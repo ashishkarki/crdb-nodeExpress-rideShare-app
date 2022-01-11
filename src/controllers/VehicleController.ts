@@ -40,7 +40,12 @@ class VehicleController {
     const max = +req.query.max_vehicles || 20
 
     try {
-      const vehicles = await entityManager.find(Vehicle, { take: max })
+      const vehicles = await entityManager.find(Vehicle, {
+        take: max,
+        order: {
+          last_checkin: 'DESC',
+        },
+      })
       res.status(200).json(vehicles)
     } catch (err) {
       console.error('Error performing transaction:\n', err)
@@ -64,15 +69,26 @@ class VehicleController {
     try {
       const entityManager = getManager()
 
-      // Lab TODO:
       // Create a new instance of Vehicle class.
-      // Set the new vehicle properties.
+      const newVehicle = entityManager.create(Vehicle, {
+        // Set the new vehicle properties.
+        id: uuidv4(),
+        battery: battery,
+        in_use: false,
+        vehicle_type: vehicle_type,
+        last_latitude: latitude,
+        last_longitude: longitude,
+        last_checkin: new Date().toISOString(),
+      })
+
       // Save the new vehicle to the database.
+      await entityManager.save(newVehicle)
+
       // Return the vehicle object.
-      process.stdout.write('ADD VEHICLE LAB NOT YET COMPLETED\n')
+      return VehicleController.responseBuilder(res, { id: newVehicle.id })
     } catch (err) {
       console.error('Error performing transaction:\n', err)
-      return res.status(500).json({ message: 'Cannot create vehicle' })
+      return VehicleController.errorResponseBuilder(res, 'Cannot add vehicle!!')
     }
   }
 
@@ -92,12 +108,12 @@ class VehicleController {
       const vehicle = await entityManager.findOneOrFail(Vehicle, vehicle_id)
 
       //   res.status(200).json(vehicle)
-      VehicleController.responseBuilder(res, vehicle)
+      return VehicleController.responseBuilder(res, vehicle)
     } catch (err) {
       console.error('Error performing transaction:\n', err)
 
       //   res.status(500).send('Vehicle not found')
-      VehicleController.errorResponseBuilder(res)
+      return VehicleController.errorResponseBuilder(res)
     }
   }
 
@@ -109,7 +125,7 @@ class VehicleController {
     message = 'Unable to find vehicle',
     resStatusCode = 500,
   ) => {
-    res.status(resStatusCode).send(message)
+    return res.status(resStatusCode).send(message)
   }
 
   /**
@@ -120,7 +136,7 @@ class VehicleController {
     responseObj: Vehicle | {} = {},
     responseStatus = 200,
   ) => {
-    response.status(responseStatus).json(responseObj)
+    return response.status(responseStatus).json(responseObj)
   }
 
   /**
