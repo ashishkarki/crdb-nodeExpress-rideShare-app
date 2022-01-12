@@ -34,6 +34,14 @@ export class VehicleRouter {
       },
     )
 
+    // toggle a vehicle's ride status
+    express.put(
+      '/api/vehicles/:vehicle_id/in_use_toggle',
+      (req: Request, res: Response): void => {
+        VehicleController.inUseToggle(req, res)
+      },
+    )
+
     express.put(
       '/api/vehicles/:vehicle_id/checkin',
       (req: Request, res: Response): void => {
