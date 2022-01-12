@@ -1,3 +1,4 @@
+import { Ride } from './Ride'
 import { LocationHistory } from './LocationHistory'
 import { Entity, PrimaryColumn, Column, AfterLoad, OneToMany } from 'typeorm'
 // import * as moment from "moment"
@@ -22,4 +23,7 @@ export class Vehicle {
     (locationHistory) => locationHistory.vehicle,
   )
   locationHistory: LocationHistory[]
+
+  @OneToMany((type) => Ride, (ride) => ride.vehicle)
+  rideList: Ride[]
 }
